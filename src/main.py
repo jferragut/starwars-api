@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User,Person,Planet,Starship
 #from models import Person
 
 app = Flask(__name__)
@@ -35,6 +35,31 @@ def handle_hello():
     user = User.query.get(1)
     response_body = {
         "msg": "Hello, this is your GET /user response ",
+        "user": user.serialize()
+    }
+
+    return jsonify(response_body), 200
+
+@app.route('/user', methods=['PUT'])
+def update_user_favorites():
+    user_id = request.json.get("user_id", None)
+    resource_id = request.json.get("id", None)
+    resource_type = request.json.get("type", None)
+
+    user = User.query.get(user_id)
+
+    if resource_type == "planet":
+        resource = Planet.query.get(resource_id)
+        user.planets.append(resource)
+    if resource_type == "person":
+        resource = Person.query.get(resource_id)
+        user.people.append(resource)
+    if resource_type == "starship":
+        resource = Starship.query.get(resource_id)
+        user.starships.append(resource)
+    
+    response_body = {
+        "msg": "Resource added successfully",
         "user": user.serialize()
     }
 
